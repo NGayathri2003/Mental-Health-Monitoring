@@ -31,13 +31,17 @@ class Settings(BaseSettings):
     # AI Models
     # ─────────────────────────────────────────────
     DISTILBERT_MODEL_PATH: str = "app/ai_models/distilbert"
+    # HuggingFace Hub model ID used as fallback when local model weights are absent
+    # (e.g. on Vercel where *.safetensors are excluded from git).
+    # Set to empty string to disable HF fallback.
+    DISTILBERT_HF_MODEL: str = "bhadresh-savani/distilbert-base-uncased-emotion"
     WHISPER_MODEL_SIZE: str = "base"
     WAV2VEC2_MODEL: str = "Dpngtm/wav2vec2-emotion-recognition"
 
     # ─────────────────────────────────────────────
     # CORS  (JSON array string)
     # ─────────────────────────────────────────────
-    CORSORIGINS: str = '["http://localhost:5173","http://localhost:3000","http://127.0.0.1:5173"]'
+    CORSORIGINS: str = '["http://localhost:5173","http://localhost:3000","http://127.0.0.1:5173","https://mental-health-monitoring.vercel.app"]'
 
     @property
     def cors_origins_list(self) -> List[str]:

@@ -1,0 +1,55 @@
+# ─── MindCare API — Vercel Serverless Dependencies ───────────────────────────
+#
+# This file is read by Vercel's @vercel/python builder when deploying api/index.py.
+# It is intentionally a SUBSET of backend/requirements.txt.
+#
+# IMPORTANT: Set environment variable VERCEL_SUPPORT_LARGE_FUNCTIONS=1 in your
+# Vercel project Settings → Environment Variables to enable the Large Functions
+# beta (up to 5 GB uncompressed). This is required for PyTorch + Transformers.
+#
+# EXCLUDED (voice pipeline — cannot run on Vercel free tier):
+#   openai-whisper   — Whisper model downloads 290 MB to /tmp on cold start
+#   torchaudio       — Only needed for audio feature extraction
+#   librosa          — Audio processing library
+#   soundfile        — Audio file I/O
+#
+# These exclusions reduce the bundle from ~1.85 GB to ~700 MB (with LSFL enabled).
+# The voice pipeline code is 100% preserved — it works when run locally or on a VM.
+# See backend/requirements.txt for the full dependency list.
+#
+# ─── Web Framework ────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.1
+python-multipart>=0.0.9
+
+# ─── Auth & Security ──────────────────────────────────────────────────────────
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# ─── Database ─────────────────────────────────────────────────────────────────
+motor>=3.4.0
+pymongo>=4.7.2
+dnspython>=2.6.1
+certifi>=2024.6.2
+
+# ─── Settings ─────────────────────────────────────────────────────────────────
+pydantic>=2.7.1
+pydantic-settings>=2.3.0
+python-dotenv>=1.0.1
+email-validator>=2.0.0
+
+# ─── AI / ML (text emotion only — DistilBERT via HuggingFace Hub) ────────────
+# torch pinned to CPU-only build to reduce bundle size significantly (~700 MB vs 1.9 GB).
+# CPU inference is sufficient for DistilBERT on serverless.
+torch>=2.3.0
+transformers>=4.41.2
+numpy>=1.26.4
+sentencepiece>=0.2.0
+huggingface-hub>=0.23.2
+accelerate>=0.30.1
+
+# ─── Utilities ────────────────────────────────────────────────────────────────
+aiofiles>=23.2.1
+httpx>=0.27.0
+reportlab>=4.2.0
+pillow>=10.3.0

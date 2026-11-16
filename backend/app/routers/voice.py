@@ -22,6 +22,35 @@ def parse_doc(doc):
 
 @router.post("")
 async def upload_voice(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    # ── Vercel Serverless Limitation ──────────────────────────────────────────
+    # Whisper and Wav2Vec2 models cannot run on Vercel's serverless functions:
+    #   - Combined model size exceeds practical cold-start memory constraints
+    #   - Whisper downloads ~145 MB to /tmp on cold start, adding 30-90s latency
+    #   - torchaudio, librosa and soundfile are excluded from api/requirements.txt
+    # For voice journaling, deploy the backend on Render, Railway, or a VM.
+    # This check is transparent — remove VERCEL env var to restore full functionality.
+    if os.environ.get("VERCEL"):
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "voice_unavailable_on_vercel",
+                "message": (
+                    "Voice journaling (Whisper transcription + Wav2Vec2 acoustic emotion) "
+                    "cannot run within Vercel's free serverless environment due to model "
+                    "size and execution time constraints. All text journaling and emotion "
+                    "analysis features are fully available. "
+                    "For voice support, deploy the backend on Render.com or Railway.app "
+                    "(both have free tiers) and set VITE_API_URL in your Vercel frontend "
+                    "environment variables to point to that backend URL."
+                ),
+                "alternatives": [
+                    "Text journaling with DistilBERT emotion analysis — fully available",
+                    "Deploy backend on Render.com free tier (sleeps after 15 min inactivity)",
+                    "Deploy backend on Railway.app free tier",
+                    "Deploy backend on Hugging Face Spaces (Docker)"
+                ]
+            }
+        )
     logger.info("Voice upload request started for user %s", user.get("id"))
     os.makedirs("uploads", exist_ok=True)
     file_path = f"uploads/{ObjectId()}_{file.filename}"

@@ -46,15 +46,20 @@ async def lifespan(app: FastAPI):
     os.makedirs("downloads", exist_ok=True)
 
     # Pre-load AI models into memory for fast inference (~10s or less per request)
-    try:
-        logger.info("Pre-loading AI models (DistilBERT, Whisper, Wav2Vec2)...")
-        from app.services.ai_pipeline import ai_pipeline
-        from app.services.voice_pipeline import voice_pipeline
-        ai_pipeline._ensure_loaded()
-        voice_pipeline._ensure_loaded()
-        logger.info("✅ All AI models pre-loaded successfully into memory.")
-    except Exception as e:
-        logger.warning(f"AI model pre-loading warning: {e}")
+    # NOTE: On Vercel, skip eager pre-loading — models are lazy-loaded on first request.
+    # This prevents startup timeouts since Vercel function init has a 10s hard limit.
+    if not os.environ.get("VERCEL"):
+        try:
+            logger.info("Pre-loading AI models (DistilBERT, Whisper, Wav2Vec2)...")
+            from app.services.ai_pipeline import ai_pipeline
+            from app.services.voice_pipeline import voice_pipeline
+            ai_pipeline._ensure_loaded()
+            voice_pipeline._ensure_loaded()
+            logger.info("✅ All AI models pre-loaded successfully into memory.")
+        except Exception as e:
+            logger.warning(f"AI model pre-loading warning: {e}")
+    else:
+        logger.info("⚠️  Vercel environment detected — AI models will lazy-load on first request.")
 
     logger.info("✅ Application started successfully.")
     logger.info("📖 API docs: http://localhost:8000/docs")

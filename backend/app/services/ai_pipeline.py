@@ -53,28 +53,56 @@ class AIPipeline:
             return
 
         model_path = settings.DISTILBERT_MODEL_PATH
-        if not os.path.isdir(model_path):
-            raise RuntimeError(
-                f"DistilBERT model directory not found at '{model_path}'. "
-                "Please run  python setup_model.py  from the backend directory."
+        local_model_exists = os.path.isdir(model_path) and os.path.exists(
+            os.path.join(model_path, "config.json")
+        )
+
+        if local_model_exists:
+            # Local model is present — use it directly (dev environment or VM).
+            load_path = model_path
+            logger.info(f"Loading DistilBERT model from local path '{load_path}' …")
+        else:
+            # Local model weights not found (expected on Vercel — *.safetensors are gitignored).
+            # Fall back to HuggingFace Hub download.
+            hf_model = getattr(settings, 'DISTILBERT_HF_MODEL', '').strip()
+            if not hf_model:
+                raise RuntimeError(
+                    f"DistilBERT model directory not found at '{model_path}' and "
+                    "DISTILBERT_HF_MODEL env var is not set. "
+                    "Please run python setup_model.py from the backend directory, or "
+                    "set DISTILBERT_HF_MODEL to a valid HuggingFace Hub model ID."
+                )
+            load_path = hf_model
+            logger.info(
+                f"Local model not found at '{model_path}'. "
+                f"Downloading DistilBERT from HuggingFace Hub: '{hf_model}' …"
             )
 
-        logger.info(f"Loading DistilBERT model from '{model_path}' …")
-        self.tokenizer   = AutoTokenizer.from_pretrained(model_path)
-        self.text_model  = AutoModelForSequenceClassification.from_pretrained(model_path)
+        self.tokenizer   = AutoTokenizer.from_pretrained(load_path)
+        self.text_model  = AutoModelForSequenceClassification.from_pretrained(load_path)
         self.text_model.eval()
 
-        # Load label map
-        id2label_path = os.path.join(model_path, "id2label.json")
-        if os.path.exists(id2label_path):
+        # Load label map — prefer local id2label.json (custom fine-tune),
+        # fall back to model's built-in label configuration from HF Hub.
+        id2label_path = os.path.join(model_path, "id2label.json") if local_model_exists else ""
+        if id2label_path and os.path.exists(id2label_path):
             with open(id2label_path) as f:
                 self.id2label: dict[str, str] = json.load(f)
-            logger.info(f"Loaded {len(self.id2label)}-class label map from id2label.json")
+            logger.info(f"Loaded {len(self.id2label)}-class label map from local id2label.json")
+        elif hasattr(self.text_model.config, 'id2label') and self.text_model.config.id2label:
+            # Use label map embedded in the HF model config
+            self.id2label = {
+                str(k): v for k, v in self.text_model.config.id2label.items()
+            }
+            logger.info(
+                f"Using {len(self.id2label)}-class label map from HuggingFace model config."
+            )
         else:
-            # Fall back to the standard 28-class GoEmotions set
+            # Final fall back to the standard 28-class GoEmotions set
             self.id2label = {str(i): label for i, label in enumerate(GOEMOTION_LABELS)}
             logger.warning(
-                "id2label.json not found — using default 28-class GoEmotions label map."
+                "id2label not found in local file or model config — "
+                "using default 28-class GoEmotions label map."
             )
 
         self._ready = True
