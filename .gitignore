@@ -1,0 +1,64 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ─── Environment & Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# ─── Node / Frontend ──────────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+*.tsbuildinfo
+
+# ─── Large Model Files ────────────────────────────────────────────────────────
+*.zip
+*.h5
+*.pt
+*.pth
+*.bin
+*.onnx
+*.safetensors
+model/
+gtzan_finetune/
+
+# ─── IDE & OS ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Uploads / Downloads (runtime artifacts) ──────────────────────────────────
+backend/uploads/
+backend/downloads/
+
+# ─── PDF Research Papers (large) ──────────────────────────────────────────────
+*.pdf
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+*.log
+*.swp
+*.swo
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage

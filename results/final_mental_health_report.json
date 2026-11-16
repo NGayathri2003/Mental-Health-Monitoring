@@ -1,0 +1,31 @@
+{
+    "Transcript": "I had a friend very close to me but recently after like many things have happened so I feel like I again gave her mental pressure she used to be happy I made sure that she won't get to undergo all those stuff that she undergone in her bit it but again I heard her I feel really very bad I don't want to speak to anyone I want to be alone I want to be away from everyone's life I just want to end my life I don't know to say anything",
+    "Speech Emotion": {
+        "Emotion": "sad",
+        "Confidence": 0.6478
+    },
+    "Text Emotion": {
+        "Emotion": "sadness",
+        "Confidence": 0.9958
+    },
+    "Adaptive Confidence-Guided Fusion (ACGF)": {
+        "speech_emotion": "sad",
+        "speech_confidence": 0.6478,
+        "text_emotion": "sadness",
+        "text_confidence": 0.9958,
+        "dominant_modality": "Text",
+        "final_emotion": "sadness",
+        "fusion_confidence": 0.9958
+    },
+    "Mental Health Trajectory Index (MHTI)": {
+        "Final Emotion": "sadness",
+        "Severity Score": 9,
+        "MHTI Score": 90.0,
+        "Risk Level": "Critical"
+    },
+    "Clinical Priority Assessment (CPA)": {
+        "Clinical Priority": "Priority 1 - Immediate Psychological Intervention",
+        "Monitoring Frequency": "Continuous Monitoring",
+        "Recommendation": "Immediate clinical assessment recommended. Notify psychologist and initiate crisis intervention if required."
+    }
+}
